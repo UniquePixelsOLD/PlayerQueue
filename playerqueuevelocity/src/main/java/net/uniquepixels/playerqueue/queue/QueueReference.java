@@ -1,15 +1,15 @@
 package net.uniquepixels.playerqueue.queue;
 
-import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.driver.service.ServiceTask;
 import net.kyori.adventure.bossbar.BossBar;
+import net.uniquepixels.playerqueue.queue.server.ServerData;
+import net.uniquepixels.playerqueue.queue.server.ServerTask;
 
 import java.util.Map;
 
 public interface QueueReference {
 
-    ServiceInfoSnapshot snapShot();
-    ServiceTask task();
+    ServerData data();
+
     Map<String, BossBar> languageBossBars();
 
     void sendBossBarsToPlayer();

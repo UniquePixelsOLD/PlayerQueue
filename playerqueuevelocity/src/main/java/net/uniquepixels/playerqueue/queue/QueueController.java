@@ -2,9 +2,9 @@ package net.uniquepixels.playerqueue.queue;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import eu.cloudnetservice.driver.registry.ServiceRegistry;
-import eu.cloudnetservice.driver.service.ServiceTask;
 import lombok.val;
+import net.uniquepixels.playerqueue.PlayerQueue;
+import net.uniquepixels.playerqueue.queue.server.ServerTask;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.search.FTCreateParams;
 import redis.clients.jedis.search.IndexDataType;
@@ -17,15 +17,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class QueueController {
-
-    private final ServiceRegistry serviceRegistry;
-    private final Object pluginInstance;
+    private final PlayerQueue pluginInstance;
     private final ProxyServer proxyServer;
     private final JedisPooled jedis;
-    private Map<ServiceTask, List<Queue>> runningQueues = new HashMap<>();
+    private Map<ServerTask, List<Queue>> runningQueues = new HashMap<>();
 
-    public QueueController(ServiceRegistry serviceRegistry, Object pluginInstance, ProxyServer proxyServer, JedisPooled jedis) {
-        this.serviceRegistry = serviceRegistry;
+    public QueueController(PlayerQueue pluginInstance, ProxyServer proxyServer, JedisPooled jedis) {
         this.pluginInstance = pluginInstance;
         this.proxyServer = proxyServer;
         this.jedis = jedis;
@@ -40,7 +37,7 @@ public class QueueController {
 
     }
 
-    public void addPlayersToQueue(ServiceTask task, List<Player> players) {
+    public void addPlayersToQueue(ServerTask task, List<Player> players) {
 
         val queues = runningQueues.get(task);
 
@@ -62,7 +59,7 @@ public class QueueController {
         }
 
         // TODO - add tasks with player limit to database - connect db with queue creation
-        val queue = new Queue(serviceRegistry, task, pluginInstance, proxyServer, 1, 1);
+        val queue = new Queue(task, pluginInstance, proxyServer, 1, 1);
         val queueId = queue.getQueueId();
         queues.add(queue);
 
@@ -83,7 +80,7 @@ public class QueueController {
         return new QueuePlayer(player.toString(), (String) rawQueueId);
     }
 
-    public void removePlayersFromQueue(ServiceTask task, List<Player> players) {
+    public void removePlayersFromQueue(ServerTask task, List<Player> players) {
 
         val queues = runningQueues.get(task);
 

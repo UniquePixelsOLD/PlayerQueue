@@ -2,47 +2,45 @@ package net.uniquepixels.playerqueue.queue;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import eu.cloudnetservice.driver.provider.CloudServiceFactory;
-import eu.cloudnetservice.driver.provider.ServiceTaskProvider;
-import eu.cloudnetservice.driver.registry.ServiceRegistry;
-import eu.cloudnetservice.driver.service.ServiceConfiguration;
-import eu.cloudnetservice.driver.service.ServiceCreateResult;
-import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.driver.service.ServiceTask;
 import lombok.Getter;
-import lombok.val;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.uniquepixels.playerqueue.queue.server.ServerData;
+import net.uniquepixels.playerqueue.queue.server.ServerFactory;
+import net.uniquepixels.playerqueue.queue.server.ServerHandler;
+import net.uniquepixels.playerqueue.queue.server.ServerTask;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class Queue implements QueueReference {
 
-    private final ServiceTaskProvider provider;
-    private final ServiceTask parent;
+    private ServerData data = null;
     private final List<Player> queuePlayers;
     private final Map<String, BossBar> bossBarMap = Map.of("en", BossBar.bossBar(Component.text("EN_BAR"), 1f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS),
             "de", BossBar.bossBar(Component.text("EN_BAR"), 1f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS));
     @Getter
     private final UUID queueId;
-    private ServiceCreateResult result;
-    private int minPlayers;
-    private int maxPlayers;
+    private final int minPlayers;
+    private final int maxPlayers;
 
-    public Queue(ServiceRegistry registry, ServiceTask parent, Object pluginInstance, ProxyServer server, int minPlayers, int maxPlayers) {
+    public Queue(ServerHandler serverHandler, ServerTask parent, Object pluginInstance, ProxyServer server, int minPlayers, int maxPlayers) {
         this.queueId = UUID.randomUUID();
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         queuePlayers = new ArrayList<>();
-        this.provider = registry.firstProvider(ServiceTaskProvider.class);
-        this.parent = parent;
 
-        val factory = registry.firstProvider(CloudServiceFactory.class);
-        startServer(factory);
+
+        try {
+            data = serverHandler.requestNewServer(parent.getTaskName()).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
         startBossBarUpdater(pluginInstance, server);
     }
 
@@ -69,19 +67,9 @@ public class Queue implements QueueReference {
 
     }
 
-    private void startServer(CloudServiceFactory factory) {
-        val lobbyConfig = ServiceConfiguration.builder(parent).build();
-        result = factory.createCloudService(lobbyConfig);
-    }
-
     @Override
-    public ServiceInfoSnapshot snapShot() {
-        return result.serviceInfo();
-    }
-
-    @Override
-    public ServiceTask task() {
-        return parent;
+    public ServerData data() {
+        return this.data;
     }
 
     @Override

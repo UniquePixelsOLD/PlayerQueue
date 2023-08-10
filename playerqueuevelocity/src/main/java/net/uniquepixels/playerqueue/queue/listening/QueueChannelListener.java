@@ -18,7 +18,6 @@ public class QueueChannelListener {
 
     private final ProxyServer proxyServer;
     private final QueueController controller;
-    private final ServiceTaskProvider serviceTaskProvider;
 
     @Subscribe
     public void onPluginMessageEvent(PluginMessageEvent event) {

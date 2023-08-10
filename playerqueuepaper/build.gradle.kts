@@ -22,12 +22,6 @@ val cloudNetVersion = "4.0.0-RC9"
 dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 
-    compileOnly("eu.cloudnetservice.cloudnet:bridge:$cloudNetVersion")
-    compileOnly("eu.cloudnetservice.cloudnet:common:$cloudNetVersion")
-    compileOnly("eu.cloudnetservice.cloudnet:driver:$cloudNetVersion")
-    compileOnly("eu.cloudnetservice.cloudnet:platform-inject-api:$cloudNetVersion")
-    compileOnly("eu.cloudnetservice.cloudnet:wrapper-jvm:$cloudNetVersion")
-
     implementation("io.github.retrooper:packetevents:2.0-SNAPSHOT")
 
     implementation("org.projectlombok:lombok:1.18.28")
@@ -39,15 +33,15 @@ tasks {
         dependsOn(reobfJar)
     }
 
-    shadowJar {
-        dependencies {
-            exclude(dependency("eu.cloudnetservice.cloudnet:bridge:$cloudNetVersion"))
-            exclude(dependency("eu.cloudnetservice.cloudnet:common:$cloudNetVersion"))
-            exclude(dependency("eu.cloudnetservice.cloudnet:driver:$cloudNetVersion"))
-            exclude(dependency("eu.cloudnetservice.cloudnet:platform-inject-api:$cloudNetVersion"))
-            exclude(dependency("eu.cloudnetservice.cloudnet:wrapper-jvm:$cloudNetVersion"))
-        }
-    }
+//    shadowJar {
+//        dependencies {
+//            exclude(dependency("eu.cloudnetservice.cloudnet:bridge:$cloudNetVersion"))
+//            exclude(dependency("eu.cloudnetservice.cloudnet:common:$cloudNetVersion"))
+//            exclude(dependency("eu.cloudnetservice.cloudnet:driver:$cloudNetVersion"))
+//            exclude(dependency("eu.cloudnetservice.cloudnet:platform-inject-api:$cloudNetVersion"))
+//            exclude(dependency("eu.cloudnetservice.cloudnet:wrapper-jvm:$cloudNetVersion"))
+//        }
+//    }
 
     compileJava {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
