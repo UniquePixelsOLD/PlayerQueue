@@ -1,0 +1,61 @@
+plugins {
+    id("java")
+    id("eclipse")
+    id("org.jetbrains.gradle.plugin.idea-ext") version ("1.0.1")
+    id("com.github.johnrengelman.shadow") version ("8.1.1")
+}
+
+val group = "net.uniquepixels"
+val version = "1.0.0"
+
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.cloudnetservice.eu/repository/releases/")
+    maven("https://jitpack.io")
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+}
+
+val cloudNetVersion = "4.0.0-RC10-SNAPSHOT"
+
+dependencies {
+    compileOnly("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
+    annotationProcessor("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
+
+    compileOnly("eu.cloudnetservice.cloudnet:bridge:$cloudNetVersion")
+    compileOnly("eu.cloudnetservice.cloudnet:wrapper-jvm:$cloudNetVersion")
+
+    implementation("org.projectlombok:lombok:1.18.28")
+    annotationProcessor("org.projectlombok:lombok:1.18.28")
+
+    implementation("redis.clients:jedis:4.3.1")
+}
+
+tasks.register("generateTemplates") {
+
+}
+
+tasks {
+    shadowJar {
+        dependencies {
+            exclude(dependency("eu.cloudnetservice.cloudnet:bridge:$cloudNetVersion"))
+            exclude(dependency("eu.cloudnetservice.cloudnet:common:$cloudNetVersion"))
+            exclude(dependency("eu.cloudnetservice.cloudnet:driver:$cloudNetVersion"))
+            exclude(dependency("eu.cloudnetservice.cloudnet:platform-inject-api:$cloudNetVersion"))
+            exclude(dependency("eu.cloudnetservice.cloudnet:wrapper-jvm:$cloudNetVersion"))
+        }
+    }
+    compileJava {
+        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
+
+        // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
+        // See https://openjdk.java.net/jeps/247 for more information.
+        options.release.set(14)
+    }
+    javadoc {
+        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
+    }
+    processResources {
+        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
+    }
+}

@@ -1,0 +1,7 @@
+main: net.uniquepixels.playerqueuepaper.PlayerQueuePaper
+version: 1.0.0
+name: PlayerQueuePaper
+author: DasShorty
+depend: [ packetevents ]
+commands:
+  test:
