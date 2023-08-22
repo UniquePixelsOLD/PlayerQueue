@@ -1,5 +1,5 @@
 {
-  "runtimeModule": false,
+  "runtimeModule": true,
   "storesSensitiveData": false,
   "main": "net.uniquepixels.playerqueuemodule.PlayerQueueModule",
   "name": "PlayerQueueModule",
