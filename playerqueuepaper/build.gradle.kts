@@ -14,7 +14,9 @@ java {
 
 repositories {
     maven("https://jitpack.io/")
+    maven("https://repo.dmulloy2.net/repository/public/")
     mavenCentral()
+    mavenLocal()
 }
 
 val cloudNetVersion = "4.0.0-RC9"
@@ -22,10 +24,13 @@ val cloudNetVersion = "4.0.0-RC9"
 dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 
-    implementation("io.github.retrooper:packetevents:2.0-SNAPSHOT")
-
     implementation("org.projectlombok:lombok:1.18.28")
     annotationProcessor("org.projectlombok:lombok:1.18.28")
+
+    implementation("net.uniquepixels:core:latest")
+    implementation("net.uniquepixels:core-api:latest")
+
+    implementation("org.mongodb:mongodb-driver-sync:4.10.1")
 }
 
 tasks {
