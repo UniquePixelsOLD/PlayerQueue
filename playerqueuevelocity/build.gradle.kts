@@ -10,6 +10,7 @@ val version = "1.0.0"
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.cloudnetservice.eu/repository/releases/")
     maven("https://jitpack.io")
@@ -23,6 +24,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.28")
 
     implementation("redis.clients:jedis:4.3.1")
+
+    implementation("org.mongodb:mongodb-driver-sync:4.10.2")
+
+    implementation("net.uniquepixels:core:latest")
 }
 
 tasks.register("generateTemplates") {
