@@ -4,10 +4,10 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import eu.cloudnetservice.driver.provider.ServiceTaskProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import net.uniquepixels.playerqueue.queue.QueueController;
+import net.uniquepixels.playerqueue.queue.server.ServerTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +34,14 @@ public class QueueChannelListener {
                 val cloudNetTaskName = dataStream.readUTF();
                 val playerList = convertPlayerList(dataStream.readUTF());
 
-                controller.addPlayersToQueue(serviceTaskProvider.serviceTask(cloudNetTaskName), playerList);
+                controller.addPlayersToQueue(new ServerTask(cloudNetTaskName), playerList);
             }
             case "player:remove" -> {
 
                 val cloudNetTaskName = dataStream.readUTF();
                 val playerList = convertPlayerList(dataStream.readUTF());
 
-                controller.removePlayersFromQueue(serviceTaskProvider.serviceTask(cloudNetTaskName), playerList);
+                controller.removePlayersFromQueue(new ServerTask(cloudNetTaskName), playerList);
             }
         }
 

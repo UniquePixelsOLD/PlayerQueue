@@ -59,10 +59,9 @@ public class QueueController {
         }
 
         // TODO - add tasks with player limit to database - connect db with queue creation
-        val queue = new Queue(task, pluginInstance, proxyServer, 1, 1);
+        val queue = new Queue(null, task, pluginInstance, proxyServer, 1, 1);
         val queueId = queue.getQueueId();
         queues.add(queue);
-
     }
 
     private QueuePlayer findPlayer(UUID player) {

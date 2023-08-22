@@ -5,10 +5,11 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.uniquepixels.playerqueue.PlayerQueue;
 import net.uniquepixels.playerqueue.queue.server.ServerData;
-import net.uniquepixels.playerqueue.queue.server.ServerFactory;
 import net.uniquepixels.playerqueue.queue.server.ServerHandler;
 import net.uniquepixels.playerqueue.queue.server.ServerTask;
+import net.uniquepixels.playerqueue.queue.server.httpbody.RequestNewCloudServer;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class Queue implements QueueReference {
     private final int minPlayers;
     private final int maxPlayers;
 
-    public Queue(ServerHandler serverHandler, ServerTask parent, Object pluginInstance, ProxyServer server, int minPlayers, int maxPlayers) {
+    public Queue(ServerHandler serverHandler, ServerTask parent, PlayerQueue pluginInstance, ProxyServer server, int minPlayers, int maxPlayers) {
         this.queueId = UUID.randomUUID();
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
@@ -36,7 +37,7 @@ public class Queue implements QueueReference {
 
 
         try {
-            data = serverHandler.requestNewServer(parent.getTaskName()).get();
+            data = serverHandler.requestNewServer(new RequestNewCloudServer(parent.getTaskName())).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
