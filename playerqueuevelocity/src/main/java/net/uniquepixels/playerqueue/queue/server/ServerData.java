@@ -1,22 +1,21 @@
 package net.uniquepixels.playerqueue.queue.server;
 
-import com.velocitypowered.api.proxy.Player;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
+import net.uniquepixels.playerqueue.queue.server.httpbody.RequestServerStatus;
 
-@Getter @RequiredArgsConstructor
+import java.util.concurrent.CompletableFuture;
+
+@Getter
+@RequiredArgsConstructor
 public class ServerData {
 
     private final String serverName;
     private final ServerTask task;
 
-    public void connectPlayerToServer(Player player) {
-
-    }
-
-    public ServerStatus getServerStatus() {
-
-        return ServerStatus.STOPPED;
+    public CompletableFuture<ServerStatus> getServerStatus(ServerHandler handler) {
+        return handler.getStatusFromServer(new RequestServerStatus(serverName, task.getTaskName()));
     }
 
 }
