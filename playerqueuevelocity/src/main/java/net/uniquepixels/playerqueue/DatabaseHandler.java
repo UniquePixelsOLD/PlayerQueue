@@ -1,4 +1,4 @@
-package net.uniquepixels.playerqueuemodule;
+package net.uniquepixels.playerqueue;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
