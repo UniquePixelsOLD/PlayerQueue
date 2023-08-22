@@ -1,0 +1,18 @@
+{
+  "runtimeModule": true,
+  "storesSensitiveData": false,
+  "main": "net.uniquepixels.playerqueuemodule.PlayerQueueModule",
+  "name": "PlayerQueueModule",
+  "group": "net.uniquepixels",
+  "author": "DasShorty",
+  "version": "1.0.0",
+  "description": "Module to handle requests from velocity plugin",
+  "minJavaVersionId": 0,
+  "dependencies": [
+    {
+      "name": "CloudNet-Bridge",
+      "group": "eu.cloudnetservice.cloudnet",
+      "version": "4.0.0-RC9"
+    }
+  ]
+}
