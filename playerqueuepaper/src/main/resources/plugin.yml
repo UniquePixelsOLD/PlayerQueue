@@ -1,6 +1,7 @@
 main: net.uniquepixels.playerqueuepaper.PlayerQueuePaper
 version: 1.0.0
 name: PlayerQueuePaper
+api-version: 1.20
 author: DasShorty
 commands:
-  test:
+  queuenpc:

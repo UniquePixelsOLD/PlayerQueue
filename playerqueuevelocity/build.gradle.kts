@@ -35,15 +35,15 @@ tasks.register("generateTemplates") {
 }
 
 tasks {
-//    shadowJar {
-//        dependencies {
-//            exclude(dependency("eu.cloudnetservice.cloudnet:bridge:$cloudNetVersion"))
-//            exclude(dependency("eu.cloudnetservice.cloudnet:common:$cloudNetVersion"))
-//            exclude(dependency("eu.cloudnetservice.cloudnet:driver:$cloudNetVersion"))
-//            exclude(dependency("eu.cloudnetservice.cloudnet:platform-inject-api:$cloudNetVersion"))
-//            exclude(dependency("eu.cloudnetservice.cloudnet:wrapper-jvm:$cloudNetVersion"))
-//        }
-//    }
+    shadowJar {
+        dependencies {
+            include(dependency("org.mongodb:mongodb-driver-sync:4.10.2"))
+            include(dependency("org.mongodb:mongodb-driver-core:4.10.2"))
+            include(dependency("org.mongodb:bson:4.10.2"))
+            include(dependency("redis.clients:jedis:4.3.1"))
+            exclude(dependency("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"))
+        }
+    }
     compileJava {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
 

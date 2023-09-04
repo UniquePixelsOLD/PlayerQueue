@@ -32,9 +32,23 @@ public class QueueController {
                         .on(IndexDataType.JSON)
                         .addPrefix("queuePlayers:"),
                 TextField.of("$.uuid").as("uuid"),
-                TextField.of("$.queueID").as("queueID"));
+                TextField.of("$.queueID").as("queueID"),
+                TextField.of("$.serverTask").as("serverTask"));
 
 
+    }
+
+    public boolean isPlayerInQueue(UUID uuid) {
+
+        val query = new Query(uuid.toString());
+
+        val documents = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId"))
+                .getDocuments();
+
+        if (documents.isEmpty())
+            return false;
+
+        return true;
     }
 
     public void addPlayersToQueue(ServerTask task, List<Player> players) {
@@ -49,7 +63,7 @@ public class QueueController {
 
             players.forEach(player -> {
 
-                jedis.jsonSetWithEscape("queuePlayers:" + player.getUsername(), new QueuePlayer(player.getUniqueId().toString(), queue.getQueueId().toString()));
+                jedis.jsonSetWithEscape("queuePlayers:" + player.getUsername(), new QueuePlayer(player.getUniqueId().toString(), queue.getQueueId().toString(), task.getTaskName()));
 
                 queue.addPlayerToQueue(player);
 
@@ -64,19 +78,25 @@ public class QueueController {
         queues.add(queue);
     }
 
-    private QueuePlayer findPlayer(UUID player) {
+    public QueuePlayer findPlayer(UUID player) {
 
         val query = new Query(player.toString());
 
-        val rawQueueId = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId"))
-                .getDocuments().get(0).getProperties().iterator().next().getValue();
+        val iterator = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId", "serverTask"))
+                .getDocuments().get(0).getProperties().iterator();
+
+        val rawQueueId = iterator.next().getValue();
+        val rawServerTask = iterator.next().getValue();
 
         System.out.println(rawQueueId);
 
         if (!(rawQueueId instanceof String))
             return null;
 
-        return new QueuePlayer(player.toString(), (String) rawQueueId);
+        if (!(rawServerTask instanceof String))
+            return null;
+
+        return new QueuePlayer(player.toString(), (String) rawQueueId, ((String) rawServerTask));
     }
 
     public void removePlayersFromQueue(ServerTask task, List<Player> players) {

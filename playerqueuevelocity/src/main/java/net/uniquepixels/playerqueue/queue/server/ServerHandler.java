@@ -29,7 +29,7 @@ public class ServerHandler {
 
         val builder = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body), StandardCharsets.UTF_8))
-                .uri(new URI("http://127.0.0.1:778/cloud/request-server"))
+                .uri(new URI("http://localhost:700/cloud/request-server"))
                 .header("Bearer", databaseHandler.getHttpToken());
 
         var future = new CompletableFuture<ServerData>();
@@ -37,7 +37,8 @@ public class ServerHandler {
         this.client.sendAsync(builder.build(), HttpResponse.BodyHandlers.ofInputStream()).thenAccept(inputStreamHttpResponse -> {
 
             if (inputStreamHttpResponse.statusCode() != 200) {
-                future.complete(null);
+                System.out.println("(Request Server) Wrong HTTP Request: " + inputStreamHttpResponse.statusCode());
+                future.cancel(true);
                 return;
             }
 
@@ -53,7 +54,7 @@ public class ServerHandler {
     public CompletableFuture<ServerStatus> getStatusFromServer(RequestServerStatus body) {
         val builder = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body), StandardCharsets.UTF_8))
-                .uri(new URI("http://127.0.0.1:778/cloud/request-server-status"))
+                .uri(new URI("http://localhost:700/cloud/request-server-status"))
                 .header("Bearer", databaseHandler.getHttpToken());
 
         var future = new CompletableFuture<ServerStatus>();
@@ -61,7 +62,8 @@ public class ServerHandler {
         this.client.sendAsync(builder.build(), HttpResponse.BodyHandlers.ofInputStream()).thenAccept(inputStreamHttpResponse -> {
 
             if (inputStreamHttpResponse.statusCode() != 200) {
-                future.complete(null);
+                System.out.println("(Request Status) Wrong HTTP Request: " + inputStreamHttpResponse.statusCode());
+                future.cancel(true);
                 return;
             }
 

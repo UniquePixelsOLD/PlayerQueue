@@ -1,5 +1,6 @@
 package net.uniquepixels.playerqueue;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -16,7 +17,7 @@ public class DatabaseHandler {
 
     public DatabaseHandler(String connectionString) {
 
-        this.client = MongoClients.create(connectionString);
+        this.client = MongoClients.create(new ConnectionString(connectionString));
         val database = this.client.getDatabase("uniquepixels");
         this.httpAuthenticationDatabase = database.getCollection("httpAuthentication");
 

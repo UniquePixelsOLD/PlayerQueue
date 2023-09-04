@@ -22,11 +22,16 @@ public class QueueChannelListener {
     @Subscribe
     public void onPluginMessageEvent(PluginMessageEvent event) {
 
+        System.out.println(event.getIdentifier().getId());
+
         if (!event.getIdentifier().getId().equals("uniquepixels:queue"))
             return;
 
         val dataStream = event.dataAsDataStream();
+
         val channelId = dataStream.readUTF();
+
+        System.out.println("New PluginMessage: " + channelId);
 
         switch (channelId.toLowerCase()) {
             case "player:add" -> {

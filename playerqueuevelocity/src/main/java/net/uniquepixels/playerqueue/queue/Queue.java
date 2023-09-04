@@ -3,6 +3,7 @@ package net.uniquepixels.playerqueue.queue;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
+import lombok.val;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.uniquepixels.playerqueue.PlayerQueue;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Queue implements QueueReference {
 
@@ -35,9 +37,16 @@ public class Queue implements QueueReference {
         this.maxPlayers = maxPlayers;
         queuePlayers = new ArrayList<>();
 
+        server.getScheduler().buildTask(pluginInstance, () -> init(serverHandler, parent, pluginInstance, server)).delay(1, TimeUnit.SECONDS);
+    }
 
+    private void init(ServerHandler serverHandler, ServerTask parent, PlayerQueue pluginInstance, ProxyServer server) {
         try {
-            data = serverHandler.requestNewServer(new RequestNewCloudServer(parent.getTaskName())).get();
+            val future = serverHandler.requestNewServer(new RequestNewCloudServer(parent.getTaskName()));
+
+            if (future.isCancelled())
+
+                data = future.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

@@ -13,8 +13,9 @@ java {
 }
 
 repositories {
-    maven("https://jitpack.io/")
-    maven("https://repo.dmulloy2.net/repository/public/")
+    //maven("https://maven.enginehub.org/repo/")
+    //maven("https://repo.dmulloy2.net/repository/public/")
+    maven("https://repo.alessiodp.com/releases/")
     mavenCentral()
     mavenLocal()
 }
