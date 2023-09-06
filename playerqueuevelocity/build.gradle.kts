@@ -41,6 +41,7 @@ tasks {
             include(dependency("org.mongodb:mongodb-driver-core:4.10.2"))
             include(dependency("org.mongodb:bson:4.10.2"))
             include(dependency("redis.clients:jedis:4.3.1"))
+            include(dependency("org.apache.commons:commons-pool2:2.11.1"))
             exclude(dependency("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"))
         }
     }
