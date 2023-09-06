@@ -37,7 +37,8 @@ public class Queue implements QueueReference {
         this.maxPlayers = maxPlayers;
         queuePlayers = new ArrayList<>();
 
-        server.getScheduler().buildTask(pluginInstance, () -> init(serverHandler, parent, pluginInstance, server)).delay(1, TimeUnit.SECONDS);
+        init(serverHandler, parent, pluginInstance, server);
+        //server.getScheduler().buildTask(pluginInstance, () -> init(serverHandler, parent, pluginInstance, server)).delay(1, TimeUnit.SECONDS);
     }
 
     private void init(ServerHandler serverHandler, ServerTask parent, PlayerQueue pluginInstance, ProxyServer server) {
@@ -67,7 +68,7 @@ public class Queue implements QueueReference {
     public void addPlayerToQueue(Player player) {
         queuePlayers.add(player);
 
-        player.showBossBar(bossBarMap.get(0));
+        player.showBossBar(bossBarMap.get("en"));
     }
 
     public void removePlayerFromQueue(Player player) {
