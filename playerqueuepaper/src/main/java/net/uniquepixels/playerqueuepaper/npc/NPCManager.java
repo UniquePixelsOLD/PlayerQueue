@@ -27,8 +27,6 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -109,9 +107,9 @@ public class NPCManager implements Listener {
 
         dataOutput.writeUTF("player:add");
         dataOutput.writeUTF(configuration.destinationTask());
-        dataOutput.writeUTF(new ArrayList<>(List.of(player)).toString());
+        dataOutput.writeUTF(player.stream().map(player1 -> player1.getUniqueId().toString()).toList().toString());
 
-        player.get(0).sendPluginMessage(this.plugin, "uniquepixels:queue", dataOutput.toByteArray());
+        player.get(0).sendPluginMessage(this.plugin, "minecraft:gamequeue", dataOutput.toByteArray());
     }
 
     @EventHandler
