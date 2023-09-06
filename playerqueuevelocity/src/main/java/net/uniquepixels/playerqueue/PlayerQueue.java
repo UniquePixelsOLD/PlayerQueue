@@ -8,11 +8,11 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import lombok.Getter;
 import lombok.val;
 import net.uniquepixels.playerqueue.queue.QueueController;
 import net.uniquepixels.playerqueue.queue.command.QueueLeaveCommand;
-import net.uniquepixels.playerqueue.queue.listening.QueueChannelIdentifier;
 import net.uniquepixels.playerqueue.queue.listening.QueueChannelListener;
 import net.uniquepixels.playerqueue.queue.server.ServerHandler;
 import org.slf4j.Logger;
@@ -40,12 +40,12 @@ public class PlayerQueue {
 
         JedisPooled jedis = new JedisPooled("localhost", 6379);
 
-        val queueController = new QueueController(this, this.server, jedis);
+        val queueController = new QueueController(this, this.server, jedis, serverHandler);
 
-        val queueChannelIdentifier = new QueueChannelIdentifier();
+        val queueChannelIdentifier = MinecraftChannelIdentifier.forDefaultNamespace("gamequeue");
         this.server.getChannelRegistrar().register(queueChannelIdentifier);
 
-        this.server.getEventManager().register(this, new QueueChannelListener(this.server, queueController));
+        this.server.getEventManager().register(this, new QueueChannelListener(this.server, queueController, this.logger));
 
         CommandManager commandManager = server.getCommandManager();
 
