@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.val;
 import net.uniquepixels.playerqueue.PlayerQueue;
+import net.uniquepixels.playerqueue.queue.server.ServerHandler;
 import net.uniquepixels.playerqueue.queue.server.ServerTask;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.search.FTCreateParams;
@@ -11,21 +12,23 @@ import redis.clients.jedis.search.IndexDataType;
 import redis.clients.jedis.search.Query;
 import redis.clients.jedis.search.schemafields.TextField;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class QueueController {
     private final PlayerQueue pluginInstance;
     private final ProxyServer proxyServer;
     private final JedisPooled jedis;
-    private Map<ServerTask, List<Queue>> runningQueues = new HashMap<>();
+    private final ServerHandler serverHandler;
+    private final Map<ServerTask, List<Queue>> runningQueues = new HashMap<>();
 
-    public QueueController(PlayerQueue pluginInstance, ProxyServer proxyServer, JedisPooled jedis) {
+    public QueueController(PlayerQueue pluginInstance, ProxyServer proxyServer, JedisPooled jedis, ServerHandler serverHandler) {
         this.pluginInstance = pluginInstance;
         this.proxyServer = proxyServer;
         this.jedis = jedis;
+        this.serverHandler = serverHandler;
+
+        if (jedis.ftSearch("idx:queuePlayers") != null)
+            return;
 
         jedis.ftCreate("idx:queuePlayers",
                 FTCreateParams.createParams()
@@ -45,37 +48,47 @@ public class QueueController {
         val documents = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId"))
                 .getDocuments();
 
-        if (documents.isEmpty())
-            return false;
-
-        return true;
+        return !documents.isEmpty();
     }
 
     public void addPlayersToQueue(ServerTask task, List<Player> players) {
 
-        val queues = runningQueues.get(task);
+        var queues = runningQueues.get(task);
 
-        // add player to queue if a slot is free
-        for (Queue queue : queues) {
+        if (queues != null)
+            // add player to queue if a slot is free
+            for (Queue queue : queues) {
 
-            if (!queue.canQueueHandlePlayers(players.size()))
-                continue;
+                if (!queue.canQueueHandlePlayers(players.size()))
+                    continue;
 
-            players.forEach(player -> {
+                addToRedis(players, queue, task);
 
-                jedis.jsonSetWithEscape("queuePlayers:" + player.getUsername(), new QueuePlayer(player.getUniqueId().toString(), queue.getQueueId().toString(), task.getTaskName()));
-
-                queue.addPlayerToQueue(player);
-
-            });
-
-            return;
-        }
+                return;
+            }
 
         // TODO - add tasks with player limit to database - connect db with queue creation
-        val queue = new Queue(null, task, pluginInstance, proxyServer, 1, 1);
-        val queueId = queue.getQueueId();
-        queues.add(queue);
+        val queue = new Queue(this.serverHandler, task, pluginInstance, proxyServer, 1, 1);
+
+        if (queues == null) {
+            queues = new ArrayList<>();
+            queues.add(queue);
+            runningQueues.put(task, queues);
+        } else
+            queues.add(queue);
+
+
+        addToRedis(players, queue, task);
+    }
+
+    private void addToRedis(List<Player> players, Queue queue, ServerTask task) {
+        players.forEach(player -> {
+
+            jedis.jsonSetWithEscape("queuePlayers:" + player.getUsername(), new QueuePlayer(player.getUniqueId().toString(), queue.getQueueId().toString(), task.getTaskName()));
+
+            queue.addPlayerToQueue(player);
+
+        });
     }
 
     public QueuePlayer findPlayer(UUID player) {
