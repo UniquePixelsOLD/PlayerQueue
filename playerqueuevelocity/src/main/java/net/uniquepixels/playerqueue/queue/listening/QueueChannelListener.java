@@ -22,16 +22,12 @@ public class QueueChannelListener {
     @Subscribe
     public void onPluginMessageEvent(PluginMessageEvent event) {
 
-        System.out.println(event.getIdentifier().getId());
-
-        if (!event.getIdentifier().getId().equals("uniquepixels:queue"))
+        if (!event.getIdentifier().getId().equals("minecraft:gamequeue"))
             return;
 
         val dataStream = event.dataAsDataStream();
 
         val channelId = dataStream.readUTF();
-
-        System.out.println("New PluginMessage: " + channelId);
 
         switch (channelId.toLowerCase()) {
             case "player:add" -> {
@@ -57,7 +53,7 @@ public class QueueChannelListener {
         val playerList = new ArrayList<Player>();
 
         for (String s : list.split(",")) {
-            val rawUUID = s.trim().replace("(", "").replace(")", "");
+            val rawUUID = s.trim().replace("[", "").replace("]", "");
 
             val player = proxyServer.getPlayer(UUID.fromString(rawUUID));
 
