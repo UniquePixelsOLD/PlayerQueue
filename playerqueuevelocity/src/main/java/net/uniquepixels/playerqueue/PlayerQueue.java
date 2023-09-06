@@ -45,7 +45,7 @@ public class PlayerQueue {
         val queueChannelIdentifier = MinecraftChannelIdentifier.forDefaultNamespace("gamequeue");
         this.server.getChannelRegistrar().register(queueChannelIdentifier);
 
-        this.server.getEventManager().register(this, new QueueChannelListener(this.server, queueController, this.logger));
+        this.server.getEventManager().register(this, new QueueChannelListener(this.server, queueController));
 
         CommandManager commandManager = server.getCommandManager();
 
