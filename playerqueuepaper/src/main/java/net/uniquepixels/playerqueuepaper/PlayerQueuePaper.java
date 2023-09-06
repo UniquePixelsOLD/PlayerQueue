@@ -27,6 +27,6 @@ public class PlayerQueuePaper extends JavaPlugin {
         pluginManager.registerEvents(new NPCPlayerJoinListener(npcManager), this);
         pluginManager.registerEvents(npcManager, this);
 
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "uniquepixels:queue");
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "minecraft:gamequeue");
     }
 }
