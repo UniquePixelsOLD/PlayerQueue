@@ -6,12 +6,14 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
-import lombok.val;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.uniquepixels.playerqueue.queue.QueueController;
+import net.uniquepixels.playerqueue.queue.server.ServerTask;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class QueueLeaveCommand {
 
@@ -21,9 +23,9 @@ public class QueueLeaveCommand {
                 .<CommandSource>literal("leave")
                 .executes(context -> {
 
-                    val source = context.getSource();
+                    CommandSource source = context.getSource();
 
-                    val optionalUUID = source.pointers().get(Identity.UUID);
+                    Optional<UUID> optionalUUID = source.pointers().get(Identity.UUID);
 
                     if (optionalUUID.isEmpty()) {
 
@@ -32,14 +34,14 @@ public class QueueLeaveCommand {
                         return Command.SINGLE_SUCCESS;
                     }
 
-                    val uuid = optionalUUID.get();
+                    UUID uuid = optionalUUID.get();
                     if (!controller.isPlayerInQueue(uuid)) {
                         source.sendMessage(Component.text("Du bist in keiner Queue"));
                         return Command.SINGLE_SUCCESS;
                     }
 
                     source.sendMessage(Component.text("Du hast die Queue verlassen"));
-                    val serverTask = controller.findPlayer(uuid).serverTask();
+                    ServerTask serverTask = controller.findPlayer(uuid).serverTask();
                     controller.removePlayersFromQueue(serverTask, List.of(server.getPlayer(uuid).get()));
 
 

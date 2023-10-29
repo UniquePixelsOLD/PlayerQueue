@@ -1,16 +1,18 @@
 package net.uniquepixels.playerqueuepaper.npc.listener;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import net.uniquepixels.playerqueuepaper.npc.NPCConfiguration;
 import net.uniquepixels.playerqueuepaper.npc.NPCManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-@RequiredArgsConstructor
 public class NPCPlayerJoinListener implements Listener {
 
     private final NPCManager npcManager;
+
+    public NPCPlayerJoinListener(NPCManager npcManager) {
+        this.npcManager = npcManager;
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -22,7 +24,8 @@ public class NPCPlayerJoinListener implements Listener {
 
 
         this.npcManager.getAllConfigurationIds().forEachRemaining(objectId -> {
-            val configuration = this.npcManager.getConfiguration(objectId);
+            NPCConfiguration configuration = this.npcManager.getConfiguration(objectId);
+            assert configuration != null;
             this.npcManager.spawnNPC(event.getPlayer(), configuration);
         });
 

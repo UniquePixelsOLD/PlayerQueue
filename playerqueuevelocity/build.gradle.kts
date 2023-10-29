@@ -20,9 +20,6 @@ dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
 
-    implementation("org.projectlombok:lombok:1.18.28")
-    annotationProcessor("org.projectlombok:lombok:1.18.28")
-
     implementation("redis.clients:jedis:4.3.1")
 
     implementation("org.mongodb:mongodb-driver-sync:4.10.2")

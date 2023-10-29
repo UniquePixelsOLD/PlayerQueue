@@ -2,48 +2,47 @@ package net.uniquepixels.playerqueue.queue;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import lombok.Getter;
-import lombok.val;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.Component;
 import net.uniquepixels.playerqueue.PlayerQueue;
 import net.uniquepixels.playerqueue.queue.server.ServerData;
 import net.uniquepixels.playerqueue.queue.server.ServerHandler;
+import net.uniquepixels.playerqueue.queue.server.ServerStatus;
 import net.uniquepixels.playerqueue.queue.server.ServerTask;
 import net.uniquepixels.playerqueue.queue.server.httpbody.RequestNewCloudServer;
+import net.uniquepixels.playerqueue.queue.server.httpbody.RequestServerStatus;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class Queue implements QueueReference {
 
-    private ServerData data = null;
     private final List<Player> queuePlayers;
-    private final Map<String, BossBar> bossBarMap = Map.of("en", BossBar.bossBar(Component.text("EN_BAR"), 1f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS),
-            "de", BossBar.bossBar(Component.text("EN_BAR"), 1f, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS));
-    @Getter
+    private final Map<String, QueueBar> queueBarMap = new HashMap<>();
     private final UUID queueId;
     private final int minPlayers;
     private final int maxPlayers;
-
+    private ServerData data = null;
     public Queue(ServerHandler serverHandler, ServerTask parent, PlayerQueue pluginInstance, ProxyServer server, int minPlayers, int maxPlayers) {
         this.queueId = UUID.randomUUID();
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         queuePlayers = new ArrayList<>();
 
-        init(serverHandler, parent, pluginInstance, server);
-        //server.getScheduler().buildTask(pluginInstance, () -> init(serverHandler, parent, pluginInstance, server)).delay(1, TimeUnit.SECONDS);
+        this.queueBarMap.put("en", new QueueBar());
+        this.queueBarMap.put("de", new QueueBar());
+
+        init(serverHandler, parent);
+        server.getScheduler().buildTask(pluginInstance, () -> getStatus(serverHandler)).repeat(10, TimeUnit.SECONDS);
     }
 
-    private void init(ServerHandler serverHandler, ServerTask parent, PlayerQueue pluginInstance, ProxyServer server) {
+    public UUID getQueueId() {
+        return queueId;
+    }
+
+    private void init(ServerHandler serverHandler, ServerTask parent) {
         try {
-            val future = serverHandler.requestNewServer(new RequestNewCloudServer(parent.getTaskName()));
+            CompletableFuture<ServerData> future = serverHandler.requestNewServer(new RequestNewCloudServer(parent.getTaskName()));
 
             if (future.isCancelled())
 
@@ -51,14 +50,10 @@ public class Queue implements QueueReference {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-
-        startBossBarUpdater(pluginInstance, server);
     }
 
-    private void startBossBarUpdater(Object pluginInstance, ProxyServer server) {
-
-        server.getScheduler().buildTask(pluginInstance, this::sendBossBarsToPlayer).repeat(Duration.ofSeconds(2));
-
+    private void getStatus(ServerHandler serverHandler) {
+        CompletableFuture<ServerStatus> statusFromServer = serverHandler.getStatusFromServer(new RequestServerStatus(this.data.getServerName(), this.data.getTask().getTaskName()));
     }
 
     public boolean canQueueHandlePlayers(int playerSize) {
@@ -67,15 +62,12 @@ public class Queue implements QueueReference {
 
     public void addPlayerToQueue(Player player) {
         queuePlayers.add(player);
-
-        player.showBossBar(bossBarMap.get("en"));
+        this.queueBarMap.get("en").addPlayer(player);
     }
 
     public void removePlayerFromQueue(Player player) {
         queuePlayers.remove(player);
-
-        player.hideBossBar(bossBarMap.get(0));
-
+        this.queueBarMap.get("en").removePlayer(player);
     }
 
     @Override
@@ -84,19 +76,7 @@ public class Queue implements QueueReference {
     }
 
     @Override
-    public Map<String, BossBar> languageBossBars() {
-        return bossBarMap;
-    }
-
-    @Override
-    public void sendBossBarsToPlayer() {
-
-        for (String language : bossBarMap.keySet()) {
-
-            bossBarMap.get(language)
-                    .name(Component.text("Players: " + queuePlayers.size() + " / " + minPlayers));
-
-        }
-
+    public Map<String, QueueBar> languageBossBars() {
+        return this.queueBarMap;
     }
 }

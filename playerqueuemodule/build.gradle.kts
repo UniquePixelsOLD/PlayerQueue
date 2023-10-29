@@ -19,9 +19,7 @@ dependencies {
 
     implementation("org.mongodb:mongodb-driver-sync:4.10.2")
 
-    implementation("org.projectlombok:lombok:1.18.28")
-    annotationProcessor("org.projectlombok:lombok:1.18.28")
-
+    implementation("javax.websocket:javax.websocket-api:1.1")
 }
 
 //tasks {

@@ -25,9 +25,6 @@ val cloudNetVersion = "4.0.0-RC9"
 dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 
-    implementation("org.projectlombok:lombok:1.18.28")
-    annotationProcessor("org.projectlombok:lombok:1.18.28")
-
     implementation("net.uniquepixels:core:latest")
     implementation("net.uniquepixels:core-api:latest")
 

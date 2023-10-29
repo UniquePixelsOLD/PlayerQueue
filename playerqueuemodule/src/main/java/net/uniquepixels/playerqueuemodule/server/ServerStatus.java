@@ -1,9 +1,9 @@
-package net.uniquepixels.playerqueue.queue.server;
+package net.uniquepixels.playerqueuemodule.server;
 
 public enum ServerStatus {
 
-    PREPARED,
     RUNNING,
+    PREPARED,
     STOPPED,
     DELETED
 

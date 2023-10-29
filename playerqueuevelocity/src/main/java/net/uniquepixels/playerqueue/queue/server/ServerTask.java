@@ -1,11 +1,14 @@
 package net.uniquepixels.playerqueue.queue.server;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@Getter @RequiredArgsConstructor
 public class ServerTask {
-
     private final String taskName;
+
+    public ServerTask(String taskName) {
+        this.taskName = taskName;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
 
 }

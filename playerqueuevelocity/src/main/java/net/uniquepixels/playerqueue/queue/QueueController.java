@@ -7,6 +7,7 @@ import net.uniquepixels.playerqueue.PlayerQueue;
 import net.uniquepixels.playerqueue.queue.server.ServerHandler;
 import net.uniquepixels.playerqueue.queue.server.ServerTask;
 import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.search.Document;
 import redis.clients.jedis.search.FTCreateParams;
 import redis.clients.jedis.search.IndexDataType;
 import redis.clients.jedis.search.Query;
@@ -43,9 +44,9 @@ public class QueueController {
 
     public boolean isPlayerInQueue(UUID uuid) {
 
-        val query = new Query(uuid.toString());
+        Query query = new Query(uuid.toString());
 
-        val documents = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId"))
+        List<Document> documents = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId"))
                 .getDocuments();
 
         return !documents.isEmpty();
@@ -53,7 +54,7 @@ public class QueueController {
 
     public void addPlayersToQueue(ServerTask task, List<Player> players) {
 
-        var queues = runningQueues.get(task);
+        List<Queue> queues = this.runningQueues.get(task);
 
         if (queues != null)
             // add player to queue if a slot is free
@@ -68,7 +69,7 @@ public class QueueController {
             }
 
         // TODO - add tasks with player limit to database - connect db with queue creation
-        val queue = new Queue(this.serverHandler, task, pluginInstance, proxyServer, 1, 1);
+        Queue queue = new Queue(this.serverHandler, task, pluginInstance, proxyServer, 1, 1);
 
         if (queues == null) {
             queues = new ArrayList<>();
@@ -93,15 +94,13 @@ public class QueueController {
 
     public QueuePlayer findPlayer(UUID player) {
 
-        val query = new Query(player.toString());
+        Query query = new Query(player.toString());
 
-        val iterator = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId", "serverTask"))
+        Iterator<Map.Entry<String, Object>> iterator = jedis.ftSearch("idx:queuePlayers", query.returnFields("queueId", "serverTask"))
                 .getDocuments().get(0).getProperties().iterator();
 
-        val rawQueueId = iterator.next().getValue();
-        val rawServerTask = iterator.next().getValue();
-
-        System.out.println(rawQueueId);
+        Object rawQueueId = iterator.next().getValue();
+        Object rawServerTask = iterator.next().getValue();
 
         if (!(rawQueueId instanceof String))
             return null;
@@ -118,7 +117,7 @@ public class QueueController {
 
         for (Player player : players) {
 
-            val queuePlayer = findPlayer(player.getUniqueId());
+            QueuePlayer queuePlayer = this.findPlayer(player.getUniqueId());
 
             if (queuePlayer == null)
                 continue;

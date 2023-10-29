@@ -5,19 +5,23 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import eu.cloudnetservice.driver.provider.ServiceTaskProvider;
 import eu.cloudnetservice.driver.service.ServiceConfiguration;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
+import eu.cloudnetservice.driver.service.ServiceCreateResult;
+import eu.cloudnetservice.driver.service.ServiceTask;
 import net.uniquepixels.playerqueuemodule.server.httpbody.ServerRequestBody;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-@RequiredArgsConstructor
 public class RequestServerHandler implements HttpHandler {
     private final ServiceTaskProvider taskProvider;
     private final String token;
+
+    public RequestServerHandler(ServiceTaskProvider taskProvider, String token) {
+        this.taskProvider = taskProvider;
+        this.token = token;
+    }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -34,21 +38,21 @@ public class RequestServerHandler implements HttpHandler {
             return;
         }
 
-        val content = new Gson().fromJson(new InputStreamReader(httpExchange.getRequestBody()), ServerRequestBody.class);
+        ServerRequestBody content = new Gson().fromJson(new InputStreamReader(httpExchange.getRequestBody()), ServerRequestBody.class);
 
 
-        val serviceTask = this.taskProvider.serviceTask(content.task());
+        ServiceTask serviceTask = this.taskProvider.serviceTask(content.task());
         assert serviceTask != null;
-        val cloudService = ServiceConfiguration.builder(serviceTask)
+        ServiceCreateResult cloudService = ServiceConfiguration.builder(serviceTask)
                 .autoDeleteOnStop(true)
                 .build().createNewService();
 
         cloudService.serviceInfo().provider().startAsync();
 
-        val data = new ServerData(cloudService.serviceInfo().name(), serviceTask.name());
+        ServerData data = new ServerData(cloudService.serviceInfo().name(), serviceTask.name());
 
-        val responseBody = httpExchange.getResponseBody();
-        val json = new Gson().toJson(data);
+        OutputStream responseBody = httpExchange.getResponseBody();
+        String json = new Gson().toJson(data);
         httpExchange.sendResponseHeaders(200, json.length());
         httpExchange.getResponseHeaders().set("Content-Type", "application/json");
         responseBody.write(json.getBytes(StandardCharsets.UTF_8));
@@ -57,9 +61,8 @@ public class RequestServerHandler implements HttpHandler {
 
     }
 
-    @SneakyThrows
-    private void sendResponse(HttpExchange exchange, String msg, int code) {
-        val responseBody = exchange.getResponseBody();
+    private void sendResponse(HttpExchange exchange, String msg, int code) throws IOException {
+        OutputStream responseBody = exchange.getResponseBody();
         responseBody.write(msg.getBytes(StandardCharsets.UTF_8));
         exchange.sendResponseHeaders(code, msg.length());
         responseBody.flush();

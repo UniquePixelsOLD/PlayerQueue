@@ -1,5 +1,6 @@
 package net.uniquepixels.playerqueuemodule;
 
+import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.spi.HttpServerProvider;
 import eu.cloudnetservice.driver.module.ModuleLifeCycle;
 import eu.cloudnetservice.driver.module.ModuleTask;
@@ -8,12 +9,11 @@ import eu.cloudnetservice.driver.provider.CloudServiceFactory;
 import eu.cloudnetservice.driver.provider.ServiceTaskProvider;
 import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import jakarta.inject.Singleton;
-import lombok.SneakyThrows;
-import lombok.val;
 import net.uniquepixels.playerqueuemodule.server.RequestServerHandler;
 import net.uniquepixels.playerqueuemodule.server.RequestServerStatusHandler;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
@@ -21,7 +21,6 @@ import java.util.concurrent.Executors;
 public class PlayerQueueModule extends DriverModule {
 
     @ModuleTask(lifecycle = ModuleLifeCycle.STARTED)
-    @SneakyThrows
     public void startUp(@NotNull ServiceTaskProvider taskProvider, @NotNull CloudServiceFactory serviceFactory, @NotNull ServiceRegistry serviceRegistry) {
         System.out.println("\n" +
                 "  _____  _                        ____                        \n" +
@@ -33,19 +32,25 @@ public class PlayerQueueModule extends DriverModule {
                 "                  __/ |                                       \n" +
                 "                 |___/                                        \n");
 
-        val databaseHandler = new DatabaseHandler("mongodb://root:root@localhost:27017/?authMechanism=SCRAM-SHA-1");
+        DatabaseHandler databaseHandler = new DatabaseHandler("mongodb://root:root@localhost:27017/?authMechanism=SCRAM-SHA-1");
 
-        val httpServer = HttpServerProvider.provider().createHttpServer(new InetSocketAddress(700), 700);
+        HttpServer httpServer = null;
+        try {
+            httpServer = HttpServerProvider.provider().createHttpServer(new InetSocketAddress(700), 700);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         httpServer.setExecutor(Executors.newFixedThreadPool(10));
         httpServer.createContext("/cloud/request-server", new RequestServerHandler(taskProvider, databaseHandler.getHttpToken()));
-        httpServer.createContext("/cloud/request-server-status", new RequestServerStatusHandler(taskProvider, databaseHandler.getHttpToken()));
+        httpServer.createContext("/cloud/request-server-status", new RequestServerStatusHandler(databaseHandler.getHttpToken(), serviceRegistry));
 
         httpServer.start();
 
+        HttpServer finalHttpServer = httpServer;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 
             databaseHandler.disConnect();
-            httpServer.stop(1);
+            finalHttpServer.stop(1);
 
         }));
     }
