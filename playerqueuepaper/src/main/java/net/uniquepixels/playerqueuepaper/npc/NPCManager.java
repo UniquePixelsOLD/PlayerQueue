@@ -10,8 +10,6 @@ import com.mojang.authlib.properties.Property;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
-import lombok.SneakyThrows;
-import lombok.val;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
@@ -20,7 +18,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.uniquepixels.coreapi.database.MongoDatabase;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -44,6 +41,7 @@ public class NPCManager implements Listener {
     private final Plugin plugin;
     private final NPCDataType npcDataType;
     private final Cache<Player, Integer> clickCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
+
     public NPCManager(MongoDatabase database, Plugin plugin, NPCDataType npcDataType) {
         this.database = database;
         this.plugin = plugin;

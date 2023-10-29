@@ -9,7 +9,6 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import lombok.Getter;
 import lombok.val;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -26,9 +25,7 @@ import java.util.ResourceBundle;
 
 
 @Plugin(id = "playerqueuevelocity", name = "PlayerQueue (Velocity)", authors = {"DasShorty"})
-@Getter
 public class PlayerQueue {
-
     private final ProxyServer server;
     private final Logger logger;
 
@@ -38,19 +35,27 @@ public class PlayerQueue {
         this.logger = logger;
     }
 
+    public ProxyServer getServer() {
+        return server;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
     @Subscribe
     public void onProxyInitializing(ProxyInitializeEvent event) {
 
         setupLang();
 
-        val databaseHandler = new DatabaseHandler("mongodb://root:root@localhost:27017/?authMechanism=SCRAM-SHA-1");
-        val serverHandler = new ServerHandler(databaseHandler);
+        DatabaseHandler databaseHandler = new DatabaseHandler("mongodb://root:root@localhost:27017/?authMechanism=SCRAM-SHA-1");
+        ServerHandler serverHandler = new ServerHandler(databaseHandler);
 
         JedisPooled jedis = new JedisPooled("localhost", 6379);
 
-        val queueController = new QueueController(this, this.server, jedis, serverHandler);
+        QueueController queueController = new QueueController(this, this.server, jedis, serverHandler);
 
-        val queueChannelIdentifier = MinecraftChannelIdentifier.forDefaultNamespace("gamequeue");
+        MinecraftChannelIdentifier queueChannelIdentifier = MinecraftChannelIdentifier.forDefaultNamespace("gamequeue");
         this.server.getChannelRegistrar().register(queueChannelIdentifier);
 
         this.server.getEventManager().register(this, new QueueChannelListener(this.server, queueController));
@@ -65,8 +70,8 @@ public class PlayerQueue {
     }
 
     private void setupLang() {
-        val registry = TranslationRegistry.create(Key.key("uniquepixels:playerqueue"));
-        val bundle = ResourceBundle.getBundle("translation");
+        TranslationRegistry registry = TranslationRegistry.create(Key.key("uniquepixels:playerqueue"));
+        ResourceBundle bundle = ResourceBundle.getBundle("translation");
         registry.registerAll(Locale.ENGLISH, bundle, true);
         GlobalTranslator.translator().addSource(registry);
     }

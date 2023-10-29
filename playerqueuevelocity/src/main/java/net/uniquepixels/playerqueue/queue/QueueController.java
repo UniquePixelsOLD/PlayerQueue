@@ -2,7 +2,6 @@ package net.uniquepixels.playerqueue.queue;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import lombok.val;
 import net.uniquepixels.playerqueue.PlayerQueue;
 import net.uniquepixels.playerqueue.queue.server.ServerHandler;
 import net.uniquepixels.playerqueue.queue.server.ServerTask;
@@ -113,7 +112,7 @@ public class QueueController {
 
     public void removePlayersFromQueue(ServerTask task, List<Player> players) {
 
-        val queues = runningQueues.get(task);
+        List<Queue> queues = runningQueues.get(task);
 
         for (Player player : players) {
 
