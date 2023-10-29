@@ -1,2 +1,3 @@
 .idea
 /playerqueuemodule/.gradle/
+/playerqueuemodule/build/tmp/compileJava/compileTransaction/stash-dir/RequestServerStatusHandler.class.uniqueId1
